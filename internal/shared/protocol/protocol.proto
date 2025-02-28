@@ -21,6 +21,6 @@ message PolicyMessage {
 
 message RemoveRuleMessage {
     string remote_ip = 1;
-    string action = 2;
+    string app_path = 2;
     string protocol = 3;
 }
