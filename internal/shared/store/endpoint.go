@@ -34,7 +34,6 @@ func (es *EndpointStore) CreateEndpoint(ip string, port string) (string, error) 
 	return strconv.Itoa(int(searchedEndpoint.ID)), nil
 }
 
-
 func (es *EndpointStore) GetEndpoints() ([]schema.Endpoint, error) {
 	var endpoints []schema.Endpoint
 	err := es.DB.Find(&endpoints).Error
@@ -43,7 +42,6 @@ func (es *EndpointStore) GetEndpoints() ([]schema.Endpoint, error) {
 	}
 	return endpoints, nil
 }
-
 
 func (es *EndpointStore) DeleteEndpoint(id string) error {
 	idInt, err := strconv.Atoi(id)

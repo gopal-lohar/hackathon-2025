@@ -1,5 +1,5 @@
 API_BINARY_PATH = bin/api
-LINUX_BINARY_PATH = bin/linux
+FIREWALL_BINARY_PATH = bin/firewall
 PROTO_FILE = internal/shared/protocol/protocol.proto
 PROTO_GO = internal/shared/protocol/protocol.pb.go
 OPENSNITCH_PROTO_FILE = internal/shared/opensnitch/opensnitch.proto
@@ -25,16 +25,16 @@ run-api: api
 		@./$(API_BINARY_PATH)
 
 # Linux Agent targets
-.PHONY: linux
-linux: protoc
-		@echo "Building linux..."
+.PHONY: firewall
+firewall: protoc
+		@echo "Building firewall..."
 		@mkdir -p bin
-		@go build -o $(LINUX_BINARY_PATH) ./cmd/linux
+		@go build -o $(FIREWALL_BINARY_PATH) ./cmd/firewall
 
-.PHONY: run-linux
-run-linux: linux
-		@echo "Running linux..."
-		@./$(LINUX_BINARY_PATH)
+.PHONY: run-firewall
+run-firewall: firewall
+		@echo "Running firewall..."
+		@./$(FIREWALL_BINARY_PATH)
 
 .PHONY: clean
 clean:

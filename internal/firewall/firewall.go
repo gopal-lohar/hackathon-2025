@@ -88,13 +88,13 @@ func (f *Firewall) listenAPIServerMsgs() {
 			// fix bad code (impossible)
 			program := netMsg.GetPolicy().GetAppPath()
 			protocol := netMsg.GetPolicy().GetProtocol()
-			remoteAddr := netMsg.GetPolicy().GetRemoteIp()
+			remoteIp := netMsg.GetPolicy().GetRemoteIp()
 			action := netMsg.GetPolicy().GetAction()
 			temp := store.Temp{
 				EndpointID: m.Policy.GetEndpointId(),
 				Enabled:    false,
 			}
-			id, err := f.ruleStore.AddRule(program, protocol, remoteAddr, action, true, temp)
+			id, err := f.ruleStore.AddRule(program, protocol, remoteIp, action, true, temp)
 			if err != nil {
 				f.logger.Warnf("Error adding rule to db: %v", err)
 			}
@@ -103,10 +103,10 @@ func (f *Firewall) listenAPIServerMsgs() {
 				return
 			}
 			name := strconv.Itoa(id)
-			// err = f.windows.AddNewRule(name, action, program, protocol)
-			// if err != nil {
-			// 	f.logger.Warnf("Error adding rule to windows: %v", err)
-			// }
+			err = f.windows.AddNewRule(name, action, program, remoteIp, protocol)
+			if err != nil {
+				f.logger.Warnf("Error adding rule to windows: %v", err)
+			}
 			f.logger.Infof("Created a rule with name: %s", name)
 		}
 	}

@@ -61,7 +61,7 @@ func (rs *RuleStore) AddRule(program, protocol, remoteAddr, action string, enabl
 		return 0, err
 	}
 
-	if temp.Enabled == true {
+	if temp.Enabled {
 		endpointidInt, _ := strconv.Atoi(temp.EndpointID)
 		endpointRule := &schema.EndpointRule{
 			EndpointID: uint(endpointidInt),
@@ -99,6 +99,27 @@ func (rs *RuleStore) GetRules() ([]RealRule, error) {
 	return realRules, err
 }
 
+func (rs *RuleStore) GetRulesForOneEndpoint(endpointId uint) ([]RealRule, error) {
+	rules := []schema.Rule{}
+	err := rs.DB.Where("id = ?", endpointId).Find(&rules).Error
+	if err != nil {
+		return nil, err
+	}
+	realRules := make([]RealRule, 0)
+	for _, rule := range rules {
+		endpointId := rs.GetEndpointId(rule.ID)
+		realRules = append(realRules, RealRule{
+			ID:         rule.ID,
+			EndpointID: endpointId,
+			Program:    rule.Program,
+			Protocol:   rule.Protocol,
+			RemoteIP:   rule.RemoteAddr,
+			Action:     rule.Action,
+			Enabled:    rule.Enabled,
+		})
+	}
+	return realRules, nil
+}
 func (rs *RuleStore) GetEndpointId(ruleId uint) string {
 	endpointRule := &schema.EndpointRule{}
 	err := rs.DB.Where("rule_id = ?", ruleId).First(endpointRule).Error

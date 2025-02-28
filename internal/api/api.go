@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net"
 	"net/http"
+	"strconv"
 
 	"github.com/gopal-lohar/hackathon-2025/internal/api/db"
 	"github.com/gopal-lohar/hackathon-2025/internal/shared/protocol"
@@ -54,6 +55,23 @@ func corsMiddleware(next http.Handler) http.Handler {
 func (as *APIServer) handlePolicyOptions(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
+
+func (as *APIServer) handleGetPoliciesForOneEndpoint(w http.ResponseWriter, r *http.Request) {
+	endpointId := r.URL.Query().Get("endpoint_id")
+	if endpointId == "" {
+		utils.WriteErrorResponse(w, "endpoint_id is required", http.StatusBadRequest)
+	}
+	intRuleId, err := strconv.Atoi(endpointId)
+	if err != nil {
+		// means user sent a string instead of a number
+		utils.WriteErrorResponse(w, "Please send a valid endpoint_id", http.StatusBadRequest)
+	}
+	realRules, err := as.ruleStore.GetRulesForOneEndpoint(uint(intRuleId))
+	if err != nil {
+		utils.WriteErrorResponse(w, "Some error happened?", http.StatusInternalServerError)
+	}
+	utils.WriteJSONResponse(w, realRules)
+}
 func (as *APIServer) Run() {
 	router := mux.NewRouter()
 
@@ -62,6 +80,7 @@ func (as *APIServer) Run() {
 	router.HandleFunc("/api/v1/policy", as.handlePostPolicy).Methods("POST")
 	router.HandleFunc("/api/v1/policy", as.handlePolicyOptions).Methods("OPTIONS")
 	router.HandleFunc("/api/v1/policies", as.handleGetPolicies).Methods("GET")
+	router.HandleFunc("/api/v1/policies-for-one-endpoint", as.handleGetPoliciesForOneEndpoint).Methods("GET")
 	router.HandleFunc("/api/v1/policy", as.handleDeletePolicy).Methods("DELETE")
 	as.logger.Info("Listening on port 8080")
 	http.ListenAndServe(":8080", router)
