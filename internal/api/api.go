@@ -183,7 +183,6 @@ func (as *APIServer) handlePostPolicy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	as.logger.Infof("POST /api/v1/policy: %+v", requestData)
-	w.WriteHeader(http.StatusOK)
 	conn := as.endpointMap[requestData.EndpointID]
 	if conn == nil {
 		http.Error(w, "endpoint not found", http.StatusNotFound)
@@ -201,4 +200,5 @@ func (as *APIServer) handlePostPolicy(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.SendNetMsg(conn, netMsg)
 	as.logger.Infof("Sent policy message to endpoint id: %s", requestData.EndpointID)
+	utils.WriteSuccessResponse(w, "Successfully added policy")
 }
