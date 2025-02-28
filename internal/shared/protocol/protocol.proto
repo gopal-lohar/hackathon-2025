@@ -18,7 +18,7 @@ message PolicyMessage {
     string endpoint_id = 5;
 }
 
-message RemoveRule {
+message RemoveRuleMessage {
     string remote_ip = 1;
     string action = 2;
     string protocol = 3;
