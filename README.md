@@ -10,7 +10,7 @@ Traditional firewalls rely on static, IP-based filtering, making them ineffectiv
 
 <!-- Give me icons for the specific headers -->
 
-## 🛠 Features
+## Features
 
 - **Granular & Adaptive Policies** – Fine-tuned access control without over-restricting legitimate usage.
 - **Context Awareness** – Dynamically adjusts firewall rules based on **user roles, applications, and network conditions**.
