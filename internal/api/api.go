@@ -198,6 +198,15 @@ func (as *APIServer) handlePostPolicy(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 	}
+	// Save the rule to the database
+	temp := store.Temp{
+		EndpointID: requestData.EndpointID,
+		Enabled:    true,
+	}
+	_, err = as.ruleStore.AddRule(requestData.Program, requestData.Protocol, requestData.RemoteIP, requestData.Action, true, temp)
+	if err != nil {
+		as.logger.Warnf("Error adding rule to db: %v", err)
+	}
 	utils.SendNetMsg(conn, netMsg)
 	as.logger.Infof("Sent policy message to endpoint id: %s", requestData.EndpointID)
 	utils.WriteSuccessResponse(w, "Successfully added policy")

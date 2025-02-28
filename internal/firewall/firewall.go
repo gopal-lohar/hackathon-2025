@@ -92,7 +92,7 @@ func (f *Firewall) listenAPIServerMsgs() {
 			action := netMsg.GetPolicy().GetAction()
 			temp := store.Temp{
 				EndpointID: m.Policy.GetEndpointId(),
-				Enabled:    true,
+				Enabled:    false,
 			}
 			id, err := f.ruleStore.AddRule(program, protocol, remoteAddr, action, true, temp)
 			if err != nil {
