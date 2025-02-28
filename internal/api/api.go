@@ -50,12 +50,17 @@ func corsMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (as *APIServer) handlePolicyOptions(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
 func (as *APIServer) Run() {
 	router := mux.NewRouter()
 
 	router.Use(corsMiddleware)
 	router.HandleFunc("/api/v1/endpoints", as.handleGetEndpoints).Methods("GET")
 	router.HandleFunc("/api/v1/policy", as.handlePostPolicy).Methods("POST")
+	router.HandleFunc("/api/v1/policy", as.handlePolicyOptions).Methods("OPTIONS")
 	router.HandleFunc("/api/v1/policies", as.handleGetPolicies).Methods("GET")
 	router.HandleFunc("/api/v1/policy", as.handleDeletePolicy).Methods("DELETE")
 	as.logger.Info("Listening on port 8080")
