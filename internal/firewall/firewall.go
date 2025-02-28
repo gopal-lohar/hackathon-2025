@@ -103,6 +103,7 @@ func (f *Firewall) listenAPIServerMsgs() {
 				return
 			}
 			name := strconv.Itoa(id)
+			// FIREFOX PATH: C:\\Program Files\\Mozilla Firefox\\firefox.exe
 			err = f.windows.AddNewRule(name, action, program, remoteIp, protocol)
 			if err != nil {
 				f.logger.Warnf("Error adding rule to windows: %v", err)
