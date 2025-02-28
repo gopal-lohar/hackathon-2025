@@ -1,0 +1,8 @@
+# Binaries
+bin/
+
+# DB
+*.sqlite3
+
+# env??
+.env
