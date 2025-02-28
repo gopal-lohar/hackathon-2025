@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/gopal-lohar/hackathon-2025/internal/shared/api/db"
+	"github.com/gopal-lohar/hackathon-2025/internal/api/db"
 	"github.com/gopal-lohar/hackathon-2025/internal/shared/protocol"
 	"github.com/gopal-lohar/hackathon-2025/internal/shared/store"
 	"github.com/gopal-lohar/hackathon-2025/internal/shared/utils"
