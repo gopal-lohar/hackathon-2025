@@ -1,6 +1,6 @@
 # Centralized Application-Context Aware Firewall
 
-![Project Banner](./assets/readmeFL.png)
+![Project Banner](./assests/readmeFL.png)
 
 <!-- _An adaptive, secure, and intelligent firewall for modern network security._ -->
 
