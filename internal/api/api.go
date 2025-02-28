@@ -15,10 +15,10 @@ import (
 )
 
 type APIServer struct {
-	// endpointStore *store.EndpointStore // HACK:
-	ruleStore   *store.RuleStore
-	logger      *logrus.Logger
-	endpointMap map[string]net.Conn // endpointID -> conn
+	endpointStore *store.EndpointStore
+	ruleStore     *store.RuleStore
+	logger        *logrus.Logger
+	endpointMap   map[string]net.Conn // endpointID -> conn
 }
 
 func NewAPIServer() *APIServer {
@@ -28,10 +28,10 @@ func NewAPIServer() *APIServer {
 	}
 
 	return &APIServer{
-		logger: logger.NewLogger(),
-		// endpointStore: store.NewEndpointStore(db), // HACK:
-		ruleStore:   store.NewRuleStore(db),
-		endpointMap: make(map[string]net.Conn),
+		logger:        logger.NewLogger(),
+		endpointStore: store.NewEndpointStore(db),
+		ruleStore:     store.NewRuleStore(db),
+		endpointMap:   make(map[string]net.Conn),
 	}
 }
 
@@ -54,7 +54,7 @@ func (as *APIServer) Run() {
 	router := mux.NewRouter()
 
 	router.Use(corsMiddleware)
-	// router.HandleFunc("/api/v1/endpoints", as.handleGetEndpoints).Methods("GET") // HACK:
+	router.HandleFunc("/api/v1/endpoints", as.handleGetEndpoints).Methods("GET")
 	router.HandleFunc("/api/v1/policy", as.handlePostPolicy).Methods("POST")
 	router.HandleFunc("/api/v1/policies", as.handleGetPolicies).Methods("GET")
 	router.HandleFunc("/api/v1/policy", as.handleDeletePolicy).Methods("DELETE")
@@ -111,27 +111,27 @@ func (as *APIServer) handleGetPolicies(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSONResponse(w, sendRules)
 }
 
-// func (as *APIServer) handleGetEndpoints(w http.ResponseWriter, r *http.Request) {
-// 	endpoints, err := as.endpointStore.GetEndpoints()
-// 	if err != nil {
-// 		as.logger.Warnf("Error getting endpoints: %v", err)
-// 		utils.WriteErrorResponse(w, "Error getting endpoints", http.StatusInternalServerError)
-// 		return
-// 	}
+func (as *APIServer) handleGetEndpoints(w http.ResponseWriter, r *http.Request) {
+	endpoints, err := as.endpointStore.GetEndpoints()
+	if err != nil {
+		as.logger.Warnf("Error getting endpoints: %v", err)
+		utils.WriteErrorResponse(w, "Error getting endpoints", http.StatusInternalServerError)
+		return
+	}
 
-// 	var endpointList []Endpoint
-// 	for _, endpoint := range endpoints {
-// 		endpointList = append(endpointList, Endpoint{
-// 			ID:   endpoint.ID,
-// 			IP:   endpoint.IP,
-// 			Port: endpoint.Port,
-// 		})
-// 	}
-// 	response := &Endpoints{
-// 		Endpoints: endpointList,
-// 	}
-// 	utils.WriteJSONResponse(w, response)
-// } // HACK:
+	var endpointList []Endpoint
+	for _, endpoint := range endpoints {
+		endpointList = append(endpointList, Endpoint{
+			ID:   endpoint.ID,
+			IP:   endpoint.IP,
+			Port: endpoint.Port,
+		})
+	}
+	response := &Endpoints{
+		Endpoints: endpointList,
+	}
+	utils.WriteJSONResponse(w, response)
+}
 
 func (as *APIServer) handlePostPolicy(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-Type")
