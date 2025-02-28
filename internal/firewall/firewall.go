@@ -65,7 +65,10 @@ func (f *Firewall) connectToAPIServer() error {
 	f.apiServerConn = conn
 	return nil
 }
-
+func isIPAddress(host string) bool {
+	ip := net.ParseIP(host)
+	return ip != nil
+}
 func (f *Firewall) listenAPIServerMsgs() {
 	defer f.apiServerConn.Close()
 	for {
@@ -90,25 +93,57 @@ func (f *Firewall) listenAPIServerMsgs() {
 			protocol := netMsg.GetPolicy().GetProtocol()
 			remoteIp := netMsg.GetPolicy().GetRemoteIp()
 			action := netMsg.GetPolicy().GetAction()
+			ips := []string{remoteIp} // Default to the original value
+
+			// Use net.LookupIP to resolve domain name if needed
+			if !isIPAddress(remoteIp) {
+				resolvedIPs, err := net.LookupIP(remoteIp)
+				if err != nil {
+					f.logger.Warnf("Error resolving domain name %s: %v", remoteIp, err)
+				} else {
+					// Replace the list with the resolved IPs
+					ips = make([]string, 0, len(resolvedIPs))
+					for _, ip := range resolvedIPs {
+						// Only include IPv4 addresses if that's what netsh requires
+						if ip.To4() != nil {
+							ips = append(ips, ip.String())
+						}
+					}
+					if len(ips) == 0 {
+						f.logger.Warnf("No IPv4 addresses found for domain: %s", remoteIp)
+						ips = []string{remoteIp} // Fallback to original
+					}
+				}
+			}
+
+			// Store the original domain name in the database
 			temp := store.Temp{
 				EndpointID: m.Policy.GetEndpointId(),
 				Enabled:    false,
 			}
-			id, err := f.ruleStore.AddRule(program, protocol, remoteIp, action, true, temp)
-			if err != nil {
-				f.logger.Warnf("Error adding rule to db: %v", err)
+
+			// Create a rule for each resolved IP
+			for _, ip := range ips {
+				id, err := f.ruleStore.AddRule(program, protocol, ip, action, true, temp)
+				if err != nil {
+					f.logger.Warnf("Error adding rule for IP %s to db: %v", ip, err)
+					continue
+				}
+
+				if id == -1 {
+					f.logger.Warnf("Rule for IP %s already exists in db", ip)
+					continue
+				}
+
+				name := strconv.Itoa(id)
+				err = f.windows.AddNewRule(name, action, program, ip, protocol)
+				if err != nil {
+					f.logger.Warnf("Error adding rule for IP %s to windows: %v", ip, err)
+				} else {
+					f.logger.Infof("Created a rule with name: %s for IP: %s (domain: %s)", name, ip, remoteIp)
+				}
 			}
-			if id == -1 {
-				f.logger.Warnf("Rule already exists in db")
-				return
-			}
-			name := strconv.Itoa(id)
-			// FIREFOX PATH: C:\\Program Files\\Mozilla Firefox\\firefox.exe
-			err = f.windows.AddNewRule(name, action, program, remoteIp, protocol)
-			if err != nil {
-				f.logger.Warnf("Error adding rule to windows: %v", err)
-			}
-			f.logger.Infof("Created a rule with name: %s", name)
 		}
+
 	}
 }
