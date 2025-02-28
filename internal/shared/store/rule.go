@@ -100,13 +100,25 @@ func (rs *RuleStore) GetRules() ([]RealRule, error) {
 }
 
 func (rs *RuleStore) GetRulesForOneEndpoint(endpointId uint) ([]RealRule, error) {
-	rules := []schema.Rule{}
-	err := rs.DB.Where("id = ?", endpointId).Find(&rules).Error
+
+	endpointRules := []schema.EndpointRule{}
+	err := rs.DB.Where("endpoint_id = ?", endpointId).Find(&endpointRules).Error
 	if err != nil {
 		return nil, err
 	}
+	rulesSlice := []schema.Rule{}
+	for _, endpointRule := range endpointRules {
+		rules := schema.Rule{}
+		err = rs.DB.Where("id = ?", endpointRule.RuleID).First(&rules).Error
+		if err != nil {
+			return nil, err
+		}
+
+		rulesSlice = append(rulesSlice, rules)
+	}
+
 	realRules := make([]RealRule, 0)
-	for _, rule := range rules {
+	for _, rule := range rulesSlice {
 		endpointId := rs.GetEndpointId(rule.ID)
 		realRules = append(realRules, RealRule{
 			ID:         rule.ID,
