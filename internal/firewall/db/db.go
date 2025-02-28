@@ -2,7 +2,8 @@ package db
 
 import (
 	"github.com/glebarez/sqlite"
-	"github.com/rudransh-shrivastava/context-aware-firewall/internal/shared/schema"
+	"github.com/gopal-lohar/hackathon-2025/internal/shared/schema"
+
 	"gorm.io/gorm"
 )
 
