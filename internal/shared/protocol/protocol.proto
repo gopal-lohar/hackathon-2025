@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package protocol;
+
+option go_package = "github.com/gopal-lohar/hackathon-2025/internal/shared/protocol";
+
+message NetworkMessage {
+    oneof message_type {
+        PolicyMessage policy = 1;
+    }
+}
+
+message PolicyMessage {
+    string app_path = 1;
+    string remote_ip = 2;
+    string action = 3;
+    string protocol = 4;
+    string endpoint_id = 5;
+}
